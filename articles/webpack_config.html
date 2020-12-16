@@ -1,0 +1,132 @@
+<h1 id="webpack-con-react">Webpack con React</h1>
+<p>Esta es la configuración básica para trabajar con React usando webpack y sin necesidad de emplear create react app.</p>
+<ol>
+<li>Crear las carpetas y archivos</li>
+</ol>
+<pre><code>-src
+-webpack.config.js</code></pre>
+<ol>
+<li>Instalar</li>
+</ol>
+<pre><code>$ npm webpack webpack-cli</code></pre>
+<ol>
+<li>Dentro de la carpeta src crear los archivos index.js e index.html.</li>
+<li>Configurar el archivo webpack.config.js</li>
+</ol>
+<pre><code>const path = require(&#39;path&#39;);
+module.exports{
+  entry:&quot;./src/index.js&quot;,
+  output:{
+    path:path.resolve(__dirname,&#39;dist&#39;),
+    filename:&quot;bundle.js&quot;
+  }
+};</code></pre>
+<p>Tenemos que decirle dónde se encuentra nuestro archivo de origen, que es index.js y dónde va a colocar el archivo bundle.js.<br>Hasta este momento sólo capta código de JavaScript y aun no compila <strong>React</strong> , por lo que para probarlo hay que usar solo JS.<br>Se ejecuta la prueba con el comando <code>npx webpack --mode development</code> .<br>Se tiene que crear el archivo bundle.js en la carpeta dist.</p>
+<ol>
+<li>Instalar html-webpack-plugin para integrar el archivo html en la carpeta dist. Configurar webpack</li>
+</ol>
+<pre><code>const HtmlWebpackPlugin = require(&#39;html-webpack-plugin&#39;);
+...
+module:{
+  rules:[]
+},
+plugins:[
+  new HtmlWebpackPlugin({
+    template:&#39;./src/index.html
+  })
+]</code></pre>
+<ol>
+<li>Instalar el entorno de desarrollo <code>webpack-dev-server</code>.</li>
+<li>Configurar el dev-server en el archivo config antes de &quot;module&quot;.</li>
+</ol>
+<pre><code>...
+devServer:{
+  port:4000,
+  hot:true,
+  watch:true,
+  open:true
+}</code></pre>
+<p>Ejecutar con el comando <code>npx webpack serve --mode development</code> apartir de webpack 5</p>
+<pre><code>npm i react react-dom @babel/core @babel/cli  @babel/preset-env</code></pre>
+<p>Configurar el archivo .bablerc. El archivo babel es un objeto JSON</p>
+<pre><code>{
+  &quot;presets&quot;:[&quot;@babel/preset-env&quot;],
+  &quot;plugins&quot;:[]
+}</code></pre>
+<ol>
+<li>Decirle a webpack que comience a usar babel, para ello en webpack se le añade una regla para testear los archivos js y jsx.</li>
+</ol>
+<pre><code>rules:[
+  {
+    test:/\.(js|jsx)$/,
+    use:[&quot;babel-loader&quot;],
+    exclude:/node_modules/
+    }
+]</code></pre>
+<p>Adicionalmente añadir el objeto resolve con las extensiones de js y jsx</p>
+<pre><code>...
+resolve:{extensions:[&#39;.js&#39;,&#39;.jsx&#39;]
+module:...
+}</code></pre>
+<ol>
+<li>Añadirle a los presets de babel e instalar el @babel/preset-react</li>
+<li>Instalar un plugi para que acepte el uso de state en react @babel/plugin-proposal-class-properties en el archivo babel añadir un array de plugins con el nuevo plugin.</li>
+<li>Añadir el css-loader y Minicssextractplugin.loader como loaders de estilos en css.</li>
+<li>Instalar el loader para imágenes file-loader.</li>
+<li>Añadir la configuración para producción.</li>
+<li>Instalar el plugin para minificar los archivos css MiniCssExtractPlugin y realizar la configuración correspondiente y añadirlo a los loaders de css.</li>
+<li>Activar el TerserPlugin de que viene con Webpack.</li>
+</ol>
+<pre><code>const devMode = process.env.NODE_ENV !== &quot;production&quot;;
+const path = require(&quot;path&quot;);
+const HtmlWebpackPlugin = require(&quot;html-webpack-plugin&quot;);
+const MiniCssExtractPlugin = require(&quot;mini-css-extract-plugin&quot;);
+const CssMinimizerPlugin = require(&quot;css-minimizer-webpack-plugin&quot;);
+const TerserPlugin = require(&quot;terser-webpack-plugin&quot;);
+
+module.exports = {
+  entry: &quot;./src/index.js&quot;,
+  output: {
+    path: path.resolve(__dirname, &quot;dist&quot;),
+    filename: &quot;bundle.js&quot;,
+  },
+  devServer: {
+    port: 4000,
+    hot: true,
+    open: true,
+  },
+  mode: &quot;development&quot;,
+  module: {
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        use: [&quot;babel-loader&quot;],
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, &quot;css-loader&quot;],
+      },
+    ],
+  },
+
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: &quot;./src/index.html&quot;,
+    }),
+    new MiniCssExtractPlugin({
+      filename: &quot;[name].css&quot;,
+    }),
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [
+      // For webpack@5 you can use the `...` syntax to extend existing minimizers (i.e. `terser-webpack-plugin`), uncomment the next line
+      // `...`
+      new CssMinimizerPlugin({ test: /\.css(\?.*)?$/i }),
+      new TerserPlugin({ test: /\.js(\?.*)?$/i }),
+    ],
+  },
+};
+
+</code></pre>

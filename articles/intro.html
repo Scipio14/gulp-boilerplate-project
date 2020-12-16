@@ -1,0 +1,62 @@
+<h1 id="prueba">Prueba</h1>
+<p>
+  Esta es una prueba dos para ver si funciona la configuración del
+  <strong>gulp</strong> task manager.
+</p>
+<ol>
+  <li>Hay que probarlo</li>
+  <li>Hay que saborearlo</li>
+  <li>Hay que olerlo bien</li>
+</ol>
+<h2 id="la-configuración-que-se-obtine-es">
+  La configuración que se obtine es:
+</h2>
+<pre><code>const gulp = require(&quot;gulp&quot;);
+const sass = require(&quot;gulp-sass&quot;);
+const markdown = require(&quot;gulp-markdown&quot;);
+const browserSync = require(&quot;browser-sync&quot;).create();
+
+//compile scss into css
+
+function style() {
+  //1. Where is my scss file
+  return (
+    gulp
+      .src(&quot;./scss/**/*.scss&quot;)
+
+      //2. Pass that file through sass compiler
+      .pipe(sass())
+      //3.Where do I save my compiled css?
+      .pipe(gulp.dest(&quot;./css&quot;))
+      //4. Stream changes to all browsers
+      .pipe(browserSync.stream())
+  );
+}
+
+async function md() {
+  await gulp
+    .src(&quot;./markdown/**/*.md&quot;)
+    //
+    .pipe(markdown())
+    //
+    .pipe(gulp.dest(&quot;./articles&quot;))
+    .pipe(browserSync.stream());
+}
+
+function watch() {
+  browserSync.init({
+    server: {
+      baseDir: &quot;./&quot;,
+    },
+    port:4000
+  });
+  gulp.watch(&quot;./scss/**/*.scss&quot;, style);
+  gulp.watch(&quot;./markdown/**/*.md&quot;, md);
+  gulp.watch(&quot;./*.html&quot;).on(&quot;change&quot;, browserSync.reload);
+  gulp.watch(&quot;./js/**/*.js&quot;).on(&quot;change&quot;, browserSync.reload);
+}
+
+exports.style = style;
+exports.md = md;
+exports.watch = watch;
+</code></pre>
